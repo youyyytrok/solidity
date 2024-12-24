@@ -430,8 +430,18 @@ std::shared_ptr<Object> YulStack::parserResult() const
 	return m_parserResult;
 }
 
+Dialect const& YulStack::dialect() const
+{
+	yulAssert(m_stackState >= AnalysisSuccessful);
+	yulAssert(m_parserResult && m_parserResult->dialect());
+	return *m_parserResult->dialect();
+}
+
 void YulStack::reportUnimplementedFeatureError(UnimplementedFeatureError const& _error)
 {
+	yulAssert(m_charStream);
 	yulAssert(_error.comment(), "Errors must include a message for the user.");
+	if (_error.sourceLocation().sourceName)
+		yulAssert(*_error.sourceLocation().sourceName == m_charStream->name());
 	m_errorReporter.unimplementedFeatureError(1920_error, _error.sourceLocation(), *_error.comment());
 }
